@@ -1,20 +1,20 @@
 const getApiBaseUrl = () => {
     const url = new URL(window.location.href);
     let path = url.pathname;
-    
+
     // Remove o nome do arquivo se presente (ex: index.html ou historico.html)
     if (path.includes('.html')) {
         path = path.substring(0, path.lastIndexOf('/'));
     }
-    
+
     // Se estiver dentro da pasta frontend, sobe um nível para achar a raiz do projeto
     if (path.endsWith('/frontend')) {
         path = path.substring(0, path.lastIndexOf('/frontend'));
     }
-    
+
     // Remove barra duplicada se o path for apenas "/"
     const basePath = path === '/' ? '' : path.replace(/\/$/, '');
-    
+
     return url.origin + basePath + '/backend/public/index.php';
 };
 const API_BASE_URL = getApiBaseUrl();
@@ -160,12 +160,12 @@ window.openPreview = function (code) {
 
     previewModal.style.display = 'flex';
     previewModal.classList.add('show');
-    
+
     // Reset Modal State
     previewImage.style.display = 'none';
     previewFallback.style.display = 'none';
     previewLoader.style.display = 'none'; // Por padrão, não mostra loader para texto
-    
+
     let imageUrl = '';
 
     if (isImageUrl(code)) {
@@ -181,7 +181,7 @@ window.openPreview = function (code) {
         previewLoader.style.display = 'flex';
         const img = new Image();
         img.src = imageUrl;
-        
+
         img.onload = () => {
             previewImage.src = imageUrl;
             previewImage.style.display = 'block';
@@ -202,11 +202,11 @@ function showFallback(code) {
     previewLoader.style.display = 'none';
     previewImage.style.display = 'none';
     previewFallback.style.display = 'flex';
-    
+
     fallbackCode.textContent = code;
     const color = generateColorCode(code);
     fallbackIcon.style.backgroundColor = `#${color}`;
-    
+
     if (code.startsWith('http')) {
         fallbackTitle.textContent = "Link Detectado";
         fallbackIcon.innerHTML = `<i data-lucide="external-link" width="40" height="40"></i>`;
@@ -307,7 +307,7 @@ async function addCode(code) {
             showToast('Código registrado!');
             if (input) input.value = '';
             loadItems();
-            
+
             // Abertura automática se for imagem
             if (isImageUrl(code) || code.startsWith('http')) {
                 openPreview(code);
@@ -666,7 +666,7 @@ async function openSendConfirmation() {
     try {
         const itemsResponse = await fetch(`${API_BASE_URL}/items`);
         const items = await itemsResponse.json();
-        
+
         if (items.length === 0) {
             showToast('Nenhum item para enviar!', 'error');
             return;
@@ -674,11 +674,11 @@ async function openSendConfirmation() {
 
         const destName = destinationInput ? destinationInput.value : 'Não informada';
         if (confirmBranchName) confirmBranchName.innerHTML = `${destName}`;
-        
+
         if (confirmItemsList) {
             confirmItemsList.innerHTML = items.map(item => {
                 const isImg = isImageUrl(item.code) || item.code.startsWith('http');
-                const contentDisplay = isImg 
+                const contentDisplay = isImg
                     ? `<button class="btn-expand-img" onclick="openPreview('${item.code}')">
                         <i data-lucide="maximize-2" width="12" height="12"></i> Expandir Imagem
                        </button>`
@@ -781,14 +781,14 @@ if (btnFinalConfirmSend) {
 
                 if (response.ok) {
                     showToast('Relatório enviado com sucesso!');
-                    
+
                     // Limpar logs do servidor após enviar com sucesso
                     try {
                         await fetch(`${API_BASE_URL}/items`, { method: 'DELETE' });
                     } catch (clearErr) {
                         console.error('Erro ao limpar itens:', clearErr);
                     }
-                    
+
                     loadItems();
                     if (destinationInput) destinationInput.value = '';
                     if (btnConfirmSend) {
