@@ -331,6 +331,33 @@ if (form) {
     });
 }
 
+// --- Modal da Câmera: Toggle QR / Código de Barras ---
+const btnModeQR = document.getElementById('btnModeQR');
+const btnModeBarcode = document.getElementById('btnModeBarcode');
+const modeSlider = document.getElementById('modeSlider');
+let currentScanMode = 'QR';
+
+function setScanMode(mode) {
+    currentScanMode = mode;
+    if (mode === 'QR') {
+        if (btnModeQR) btnModeQR.classList.add('active');
+        if (btnModeBarcode) btnModeBarcode.classList.remove('active');
+        if (modeSlider) modeSlider.style.transform = 'translateX(0)';
+    } else {
+        if (btnModeBarcode) btnModeBarcode.classList.add('active');
+        if (btnModeQR) btnModeQR.classList.remove('active');
+        if (modeSlider) modeSlider.style.transform = 'translateX(100%)';
+    }
+    
+    // Se a câmera já estiver rodando, reiniciamos ela com as novas configurações
+    if (html5QrCode && html5QrCode.isScanning) {
+        startCamera();
+    }
+}
+
+if (btnModeQR) btnModeQR.addEventListener('click', () => setScanMode('QR'));
+if (btnModeBarcode) btnModeBarcode.addEventListener('click', () => setScanMode('Barcode'));
+
 // --- Lógica da Câmera (html5-qrcode) ---
 // essa e toda a logica de abrir a camrta 
 async function startCamera() {
@@ -357,11 +384,22 @@ async function startCamera() {
 
     html5QrCode = new Html5Qrcode("reader");
 
+    // Configuração baseada no modo selecionado
+    const isQRCode = currentScanMode === 'QR';
     const config = {
         fps: 10,
-        qrbox: { width: 250, height: 250 },
+        qrbox: isQRCode ? { width: 250, height: 250 } : { width: 300, height: 150 },
         aspectRatio: 1.0,
-        disableFlip: false
+        disableFlip: false,
+        formatsToSupport: isQRCode 
+            ? [ Html5QrcodeSupportedFormats.QR_CODE ] 
+            : [ 
+                Html5QrcodeSupportedFormats.CODE_128, 
+                Html5QrcodeSupportedFormats.CODE_39,
+                Html5QrcodeSupportedFormats.EAN_13,
+                Html5QrcodeSupportedFormats.EAN_8,
+                Html5QrcodeSupportedFormats.UPC_A
+              ]
     };
 
     const onSuccess = (decodedText) => {

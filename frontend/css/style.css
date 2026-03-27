@@ -719,6 +719,68 @@ body {
     padding: 16px;
 }
 
+/* ---- Animated Segmented Control Toggle (Camera Mode) ---- */
+.mode-toggle-container {
+    width: 100%;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+}
+
+.mode-toggle-track {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: #f0f2f5;
+    border-radius: 12px;
+    padding: 4px;
+    width: 280px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+}
+
+.mode-toggle-slider {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    height: calc(100% - 8px);
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    z-index: 1;
+}
+
+.mode-toggle-option {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #64748b;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 2;
+    transition: color 0.3s ease;
+}
+
+.mode-toggle-option.active {
+    color: var(--primary-red);
+}
+
+.mode-toggle-option i {
+    transition: transform 0.2s ease;
+}
+
+.mode-toggle-option.active i {
+    transform: scale(1.1);
+}
+
 .camera-view {
     position: relative;
     width: 100%;
