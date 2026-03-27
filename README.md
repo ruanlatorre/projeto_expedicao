@@ -1,10 +1,10 @@
-# FachiniLOG — Gestão de Expedição & Coleta de Dados
+# FlowVerify — Gestão de Expedição & Coleta de Dados
 
 ![Versão](https://img.shields.io/badge/Vers%C3%A3o-1.0.0-D32F2F?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Em_Produ%C3%A3o-success?style=for-the-badge)
 ![Tech](https://img.shields.io/badge/Tech-Stack-blue?style=for-the-badge)
 
-O **FachiniLOG** é uma solução corporativa desenvolvida para a **Facchini S/A**, focada na otimização dos fluxos de expedição e coleta de dados em ambiente logístico. O sistema permite a rastreabilidade precisa de mercadorias através de leitura automatizada de etiquetas (QR Code/Barcode), reduzindo erros operacionais e aumentando a produtividade.
+O **FlowVerify** é uma solução corporativa desenvolvida para a **Facchini S/A**, focada na otimização dos fluxos de expedição e coleta de dados em ambiente logístico. O sistema permite a rastreabilidade precisa de mercadorias através de leitura automatizada de etiquetas (QR Code/Barcode), reduzindo erros operacionais e aumentando a produtividade.
 
 ---
 
