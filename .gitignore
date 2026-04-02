@@ -1,3 +1,7 @@
+# Próprio arquivo
+.gitignore
+.gitignore*
+
 # Arquivos de Dados e Configuração do Sistema
 backend/.env
 backend/.env.*
