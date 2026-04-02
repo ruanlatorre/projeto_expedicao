@@ -1,0 +1,191 @@
+/* ---- Splash Screen ---- */
+#splashScreen {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(150deg, #a30b12 0%, #a30b12 25%, #70080c 25%, #70080c 75%, #a30b12 75%, #a30b12 100%);
+    background-size: cover;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+    z-index: 99999;
+}
+
+@media (max-width: 480px) and (orientation: portrait) {
+    #splashScreen {
+        background: linear-gradient(165deg, #a30b12 0%, #a30b12 20%, #70080c 20%, #70080c 80%, #a30b12 80%, #a30b12 100%);
+    }
+}
+
+#splashScreen.fade-out {
+    animation: fadeOutSplash 0.4s ease-in-out forwards;
+    pointer-events: none;
+}
+
+.splash-logo {
+    color: var(--white);
+    font-size: clamp(42px, 11vw, 68px);
+    letter-spacing: 5px;
+    font-weight: 900;
+    opacity: 0;
+    text-shadow: 2px 2px 15px rgba(0, 0, 0, 0.7);
+    animation: fadeInLogo 0.5s ease-out forwards;
+}
+
+.splash-watermark {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: rgba(255, 255, 255, 0.35);
+    font-size: clamp(9px, 2.5vw, 11px);
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    pointer-events: none;
+    z-index: 1000;
+    text-transform: uppercase;
+}
+
+.progress-bar-container {
+    width: 180px;
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    width: 0%;
+    height: 100%;
+    background-color: var(--white);
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    animation: loadProgress 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes loadProgress {
+    0% { width: 0%; }
+    100% { width: 100%; }
+}
+
+/* ---- Carrossel ---- */
+.carousel-container {
+    width: 100%;
+    max-width: 700px;
+    height: 340px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    perspective: 1200px;
+    overflow: visible;
+    padding: 0 20px;
+    touch-action: pan-y;
+}
+
+.carousel-track {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform-style: preserve-3d;
+}
+
+.carousel-item {
+    position: absolute;
+    width: 280px;
+    height: 280px;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.carousel-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    border: 3px solid rgba(255, 255, 255, 0.15);
+    pointer-events: none;
+}
+
+.carousel-item.active {
+    transform: translateZ(60px) scale(1);
+    z-index: 10;
+    opacity: 1;
+}
+
+.carousel-item.active img {
+    border-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+}
+
+.carousel-item.prev {
+    transform: translateX(-180px) scale(0.65) rotateY(25deg);
+    z-index: 5;
+    opacity: 0.4;
+}
+
+.carousel-item.next {
+    transform: translateX(180px) scale(0.65) rotateY(-25deg);
+    z-index: 5;
+    opacity: 0.4;
+}
+
+.carousel-item.hidden {
+    transform: scale(0.4);
+    opacity: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.splash-btn {
+    opacity: 0;
+    visibility: hidden;
+    margin-top: 10px;
+    background: linear-gradient(135deg, #00C853, #00E676);
+    color: #fff;
+    width: auto !important;
+    max-width: 200px;
+    padding: 8px 24px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-radius: 50px;
+    box-shadow: 0 4px 14px rgba(0, 200, 83, 0.4);
+    transform: translateY(10px);
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.splash-btn.show {
+    visibility: visible;
+    animation: fadeInBtn 0.4s ease-out forwards;
+    pointer-events: auto;
+}
+
+.splash-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 200, 83, 0.5);
+    background: linear-gradient(135deg, #00E676, #69F0AE);
+}
+
+.splash-btn:active {
+    transform: scale(0.97);
+}
+
+@keyframes fadeInBtn {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
