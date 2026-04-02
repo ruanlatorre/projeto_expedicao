@@ -1,0 +1,72 @@
+/* ---- Scanner Section ---- */
+.scanner-section {
+    padding: 16px;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.input-wrapper {
+    flex: 1;
+    position: relative;
+    min-width: 0;
+}
+
+.input-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+#codeInput {
+    width: 100%;
+    padding: 12px 40px 12px 14px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: clamp(14px, 3.5vw, 16px);
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+#codeInput:focus {
+    border-color: var(--facchini-orange);
+}
+
+.btn-scan {
+    background-color: var(--facchini-blue);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    width: 48px;
+    min-width: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-scan:hover {
+    background-color: var(--facchini-blue-hover);
+}
+
+@media (min-width: 1025px) {
+    .btn-scan {
+        width: 56px;
+        min-width: 56px;
+        border-radius: 10px;
+        transition: background 0.3s, transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-scan:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
+    }
+}

@@ -1,0 +1,85 @@
+/* ============================================================ 
+   BASE.CSS - Configurações Globais, Variáveis e Resets
+   ============================================================ */
+
+:root {
+    --facchini-blue: #D32F2F;
+    --facchini-blue-hover: #B71C1C;
+    --facchini-orange: #F26522;
+    --facchini-orange-hover: #D9531E;
+    --bg-light: #F4F6F8;
+    --text-dark: #333333;
+    --text-muted: #777777;
+    --danger: #DC3545;
+    --white: #FFFFFF;
+    --border: #E0E0E0;
+    --primary-red: #D32F2F;
+    --primary-red-hover: #B71C1C;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
+
+body {
+    background-color: #E9ECEF;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+}
+
+/* ---- App Container (mobile-first: 100%) ---- */
+.app-container {
+    width: 100%;
+    background-color: var(--bg-light);
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+}
+
+.app-container.reveal {
+    animation: revealApp 0.5s ease-in-out forwards;
+}
+
+@keyframes revealApp {
+    0% {
+        opacity: 0;
+        transform: scale(0.98);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes fadeOutSplash {
+    0% { opacity: 1; }
+    100% {
+        opacity: 0;
+        visibility: hidden;
+        z-index: -999;
+    }
+}
+
+@keyframes fadeInLogo {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
