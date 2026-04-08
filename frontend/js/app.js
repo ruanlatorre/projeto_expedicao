@@ -803,12 +803,10 @@ if (btnFinalConfirmSend) {
                         btnConfirmSend.style.opacity = '0.5';
                     }
                 } else {
-                    const result = await response.json().catch(() => ({ error: 'nao foi possivel encaminhar para o gmail selecionado.' }));
-                    showToast(result.error || 'nao foi possivel encaminhar para o gmail selecionado.', 'error');
+                    showToast('nao foi possivel encaminhar para o gmail selecionado.', 'error');
                 }
             } catch (error) {
-                console.error('Erro ao enviar relatório:', error);
-                showToast('Erro de conexão ou erro interno no servidor.', 'error');
+                showToast('nao foi possivel encaminhar para o gmail selecionado.', 'error');
             }
         }, 2500);
     });

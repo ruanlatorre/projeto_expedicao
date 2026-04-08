@@ -4,5 +4,11 @@
         "code": "teste pereira 2",
         "timestamp": "2026-04-08 10:10:05",
         "scan_count": 1
+    },
+    {
+        "id": 1775654262173,
+        "code": "aaa",
+        "timestamp": "2026-04-08 10:17:42",
+        "scan_count": 1
     }
 ]

@@ -41,19 +41,27 @@ class ReportService
         }
 
         // 1. Envio para o Destino Intermediário
-        $this->emailSender->send(
-            $email,
-            'Coleta (Destino) - ' . date('d/m/Y'),
-            $body
-        );
+        try {
+            $this->emailSender->send(
+                $email,
+                'Coleta (Destino) - ' . date('d/m/Y'),
+                $body
+            );
+        } catch (\Exception $e) {
+            error_log("Erro ao enviar para o destino intermediário: " . $e->getMessage());
+        }
 
         // 2. Envio para o Destino Final
         if ($finalEmail !== $email) {
-            $this->emailSender->send(
-                $finalEmail,
-                'Coleta (Destino Final) - ' . date('d/m/Y'),
-                $body
-            );
+            try {
+                $this->emailSender->send(
+                    $finalEmail,
+                    'Coleta (Destino Final) - ' . date('d/m/Y'),
+                    $body
+                );
+            } catch (\Exception $e) {
+                error_log("Erro ao enviar para o destino final: " . $e->getMessage());
+            }
         }
 
         // 3. Envio de Cópia de Segurança (Apenas se não for um dos destinos principais)
@@ -65,7 +73,6 @@ class ReportService
                     $body
                 );
             } catch (\Exception $e) {
-                // Log backup errors but don't fail the main process
                 error_log("Erro ao enviar cópia de segurança: " . $e->getMessage());
             }
         }

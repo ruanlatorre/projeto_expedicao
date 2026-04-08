@@ -32,11 +32,9 @@ class PHPMailerEmailSender implements EmailSender
         try {
             $mail->isSMTP();
             $mail->Host = $this->host;
-            $mail->SMTPAuth = !empty($this->password);
-            if ($mail->SMTPAuth) {
-                $mail->Username = $this->username;
-                $mail->Password = $this->password;
-            }
+            $mail->SMTPAuth = true;
+            $mail->Username = $this->username;
+            $mail->Password = $this->password;
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = $this->port;
 
