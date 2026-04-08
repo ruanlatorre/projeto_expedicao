@@ -62,6 +62,14 @@ body {
     pointer-events: none;
 }
 
+.splash-logo-img {
+    height: 60px;
+    width: auto;
+    max-width: 100%;
+    filter: brightness(0) invert(1);
+    transition: all 0.3s ease;
+}
+
 .splash-logo {
     color: var(--white);
     font-size: clamp(42px, 11vw, 68px);
@@ -145,7 +153,7 @@ body {
     position: absolute;
     width: 280px;
     height: 280px;
-    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.75s cubic-bezier(0.4, 0, 0.2, 1);
     user-select: none;
     -webkit-user-drag: none;
 }
@@ -1415,6 +1423,36 @@ body {
 
 /* ---- Ajustes para Orientação Paisagem (Tablet/Mobile) ---- */
 @media (orientation: landscape) {
+    #splashScreen {
+        gap: 12px;
+    }
+
+    .splash-logo-img {
+        height: min(40px, 8vh);
+    }
+
+    .carousel-container {
+        height: 240px;
+    }
+
+    .carousel-item {
+        width: 200px;
+        height: 200px;
+    }
+
+    .carousel-item.prev {
+        transform: translateX(-140px) scale(0.6) rotateY(20deg);
+    }
+
+    .carousel-item.next {
+        transform: translateX(140px) scale(0.6) rotateY(-20deg);
+    }
+
+    .splash-btn {
+        margin-top: 5px;
+        padding: 6px 20px;
+    }
+
     #cameraModal .modal-header {
         padding: 5px 16px;
         min-height: 40px;
@@ -1576,5 +1614,57 @@ body {
     color: var(--text-dark);
     font-size: 14px;
     word-break: break-all;
+
+}
+
+/* ---- UX: Destaque de leitura bem-sucedida ---- */
+.new-item-highlight {
+    position: relative;
+    border-left: 5px solid #90EE90 !important;
+    /* Verde suave */
+
+}
+
+@keyframes fadeBorderHighlight {
+    0% {
+        border-left-color: #90EE90;
+    }
+
+    100% {
+        border-left-color: transparent;
+    }
+}
+
+/* ---- Estilo para Expansão de Unidades (Votuporanga) ---- */
+.branch-sublist {
+    display: none;
+    background: #f9f9f9;
+    padding-left: 20px;
+    border-top: 1px dashed #eee;
+    animation: slideDownFade 0.3s ease-out forwards;
+}
+
+.branch-sublist.expanded {
     display: block;
+}
+
+@keyframes slideDownFade {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.sub-branch-item {
+    padding: 10px 15px !important;
+    border-bottom: 1px solid #eee;
+}
+
+.sub-branch-item:last-child {
+    border-bottom: none;
 }

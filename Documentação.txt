@@ -1,0 +1,57 @@
+Documentação Técnica de Software: FacchiniLOG
+1. Identificação do Projeto
+Nome do Sistema: FacchiniLOG — Gestão de Expedição & Coleta de Dados.
+
+Versão Atual: 1.0.0.
+
+Status de Operação: Em Produção.
+
+Propriedade: Facchini S/A (Uso Exclusivo).
+
+2. Visão Geral
+O FacchiniLOG é uma aplicação corporativa voltada para a otimização logística, permitindo o controle rigoroso da expedição de mercadorias e a rastreabilidade de ativos por meio de captura automatizada de dados. O sistema foi projetado sob a premissa "Mobile-First", garantindo usabilidade em dispositivos móveis e coletores de dados industriais.
+
+3. Arquitetura e Tecnologias
+3.1 Camada de Frontend
+Estrutura: Utilização de HTML5 semântico para acessibilidade e estruturação de dados.
+
+Estilização: Implementação de CSS3 com o uso de variáveis (CSS Variables) para manutenção de padrões visuais da identidade corporativa.
+
+Lógica de Aplicação: Vanilla JavaScript para garantir alta performance e baixa latência no processamento de leituras.
+
+Recursos Visuais: Integração da biblioteca Lucide Icons para interface intuitiva.
+
+3.2 Motores de Captura (Scanners)
+HTML5-QRCode: Motor de alta performance para decodificação via navegador.
+
+jsQR: Biblioteca complementar para processamento de imagens e detecção de códigos.
+
+3.3 Camada de Backend
+Linguagem: PHP 8.0 ou superior para processamento de requisições e integração de dados.
+
+Gestão de Dependências: Composer para administração de bibliotecas externas.
+
+Protocolo de Comunicação: PHPMailer para o envio seguro de relatórios logísticos via SMTP.
+
+4. Fluxo Operacional
+Autenticação de Entrada: O sistema inicia com uma interface de Splash Screen que reforça a marca e os direitos reservados da companhia.
+
+Captura de Dados: O operador realiza a leitura de etiquetas (QR Code ou Barcode) através da câmera integrada ou periféricos USB/Bluetooth.
+
+Validação e Persistência Local: Os dados são validados em tempo real e armazenados temporariamente em LocalStorage/Session para evitar perda de informação em caso de instabilidade de conexão.
+
+Seleção de Destino: O sistema exige a parametrização das unidades de destino (filiais) antes da finalização, permitindo filtros por estado e busca por nome da unidade.
+
+Transmissão de Relatório: Após a conferência final, o sistema consolida os dados e os transmite aos e-mail de destino da logística.
+
+5. Diretrizes de Segurança e Instalação
+5.1 Requisitos de Servidor
+Ambiente de servidor compatível com Apache/Nginx (XAMPP, WAMP ou Laragon).
+
+Ativação obrigatória das extensões PHP openssl e mbstring para garantir a criptografia no envio de dados.
+
+5.2 Gerenciamento de Arquivos Críticos
+Para conformidade com as práticas de segurança, arquivos de configuração que contenham credenciais (como .env e config.js) e diretórios de bibliotecas (vendor/, node_modules/) são restritos ao ambiente local e não devem ser versionados publicamente.
+
+6. Termos de Licenciamento
+O software está licenciado sob a licença MIT, com direitos autorais estabelecidos em 2026. Entretanto, o conteúdo e a aplicação prática são de uso exclusivo e propriedade intelectual da Facchini S/A, sendo vedada a reprodução não autorizada

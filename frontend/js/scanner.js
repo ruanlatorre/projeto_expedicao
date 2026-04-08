@@ -98,7 +98,7 @@ async function startCamera() {
     const onSuccess = (decodedText) => {
         console.log("Código lido:", decodedText);
         if (navigator.vibrate) navigator.vibrate(200);
-        
+
         // Chama a função global addCode do app.js
         if (typeof addCode === 'function') {
             addCode(decodedText);

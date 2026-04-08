@@ -1,0 +1,48 @@
+Guia de Operação Padrão: FacchiniLOG
+Este documento estabelece as diretrizes e o passo a passo para a utilização do sistema de coleta de dados e expedição da Facchini S/A.
+
+1. Acesso Inicial e Autenticação
+Inicialização: Ao carregar a URL do sistema, o usuário visualizará uma Splash Screen institucional com o carrossel de imagens da empresa.
+
+Entrada no Sistema: Para prosseguir para a área operacional, o colaborador deve clicar no botão "Entrar no Sistema".
+
+Navegação: O menu lateral (acessível pelo ícone de barras no cabeçalho) permite retornar ao início ou acessar o leitor QR a qualquer momento.
+
+2. Processo de Coleta de Dados
+O sistema oferece três métodos para a entrada de informações das etiquetas:
+
+Leitura por Periféricos: Conecte um leitor físico (USB ou Bluetooth) e realize o escaneamento diretamente no campo de entrada.
+
+Leitura via Câmera:
+
+Clique no ícone de câmera no formulário de busca para abrir o modal de scanner.
+
+Selecione o modo de leitura desejado (QR Code ou Código de Barras) no seletor de modo.
+
+Posicione o código dentro do guia visual (viewfinder) até que o sistema processe a imagem.
+
+Entrada Manual: Digite o código alfanumérico no campo "Aguardar leitura..." e pressione a tecla Enter.
+
+3. Gestão da Lista de Itens
+Validação em Tempo Real: Cada item lido é adicionado instantaneamente à lista "Itens Recolhidos", com atualização automática do contador no topo da seção.
+
+Visualização: A lista exibe o código coletado e permite a conferência visual antes da expedição.
+
+Exclusão de Erros: Caso um item seja lido incorretamente, o operador pode utilizar o ícone de lixeira individual para removê-lo, mediante confirmação no modal de segurança.
+
+Limpeza Total: Para iniciar um novo lote do zero, utilize o botão "Limpar Tudo"; o sistema exigirá uma confirmação para evitar a perda acidental de dados.
+
+4. Finalização e Expedição (Fluxo de Envio)
+Após concluir a coleta de todos os volumes, siga os passos abaixo para o envio do relatório:
+
+1-Iniciar Finalização: Clique no botão "Finalizar e Enviar".
+
+2-Definição de Destino: No modal de destino, selecione a Filial de Destino e a Filial Final.
+
+3-Seleção de Unidade: Ao clicar nos campos de destino, utilize o filtro de busca ou a filtragem por estado para localizar a unidade correta na lista de filiais.
+
+4-Conferência Final: O sistema apresentará uma tabela de resumo contendo o nome da filial selecionada e a relação de códigos com suas respectivas quantidades.
+
+5-Envio de Relatório: Após validar as informações na tabela de conferência, clique em "Confirmar e Enviar" para disparar o e-mail via protocolo SMTP seguro.
+
+Nota de Segurança: Este sistema é de uso exclusivo da Facchini S/A. Todos os registros de coleta são processados conforme as políticas de logística da companhia.

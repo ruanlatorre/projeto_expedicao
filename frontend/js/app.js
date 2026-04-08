@@ -66,12 +66,15 @@ function formatDateTime(dbDate) {
     return date.toLocaleDateString('pt-PT') + ' às ' + date.toLocaleTimeString('pt-PT');
 }
 
+// Variável global para armazenar os itens e facilitar verificação de duplos
+let currentItems = [];
+
 // Função para carregar itens da API
-async function loadItems() {
+async function loadItems(highlightCode = null) {
     try {
         const response = await fetch(`${API_BASE_URL}/items`);
-        const items = await response.json();
-        renderList(items);
+        currentItems = await response.json();
+        renderList(currentItems, highlightCode);
     } catch (error) {
         console.error('Erro ao carregar itens: ', error);
         showToast('Erro ao carregar dados do servidor', 'error');
@@ -79,7 +82,7 @@ async function loadItems() {
 }
 
 // Função para renderizar a lista
-function renderList(items) {
+function renderList(items, highlightCode = null) {
     if (!listContainer) return;
     listContainer.innerHTML = '';
     if (itemCount) itemCount.textContent = items.length;
@@ -97,9 +100,18 @@ function renderList(items) {
             btnSendEmail.style.opacity = '1';
         }
 
-        items.forEach(item => {
+        // Inverte a ordem para que o item mais recente apareça primeiro (no topo)
+        const reversedItems = [...items].reverse();
+
+        reversedItems.forEach(item => {
             const li = document.createElement('li');
             li.className = 'data-item';
+
+            // Destaque visual para o novo item
+            if (highlightCode && item.code === highlightCode) {
+                li.classList.add('new-item-highlight');
+            }
+
             const scanBadge = item.scan_count > 1
                 ? `<span class="scan-count-badge" title="Escaneado ${item.scan_count} vezes"><i data-lucide="repeat" width="11" height="11"></i> ${item.scan_count}x</span>`
                 : '';
@@ -290,11 +302,21 @@ if (btnCancelDelete) {
 async function addCode(code) {
     if (!code.trim()) return;
 
+    const trimmedCode = code.trim();
+
+    // TRAVA DE DUPLICIDADE (JavaScript)
+    const exists = currentItems.some(i => i.code === trimmedCode);
+    if (exists) {
+        showToast('Código duplicado ignorado!', 'error');
+        if (input) input.value = '';
+        return;
+    }
+
     try {
         const response = await fetch(`${API_BASE_URL}/items`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code: code.trim() })
+            body: JSON.stringify({ code: trimmedCode })
         });
 
         const result = await response.json();
@@ -302,17 +324,18 @@ async function addCode(code) {
         if (response.ok) {
             showToast('Código registrado!');
             if (input) input.value = '';
-            loadItems();
+
+            // Recarrega a lista e destaca o novo código
+            loadItems(trimmedCode);
 
             // Abertura automática se for imagem
-            if (isImageUrl(code) || code.startsWith('http')) {
-                openPreview(code);
+            if (isImageUrl(trimmedCode) || trimmedCode.startsWith('http')) {
+                openPreview(trimmedCode);
             }
         } else {
             showToast(result.error || 'Erro ao registrar', 'error');
             if (input) input.value = '';
         }
-        // if (input) input.focus();
     } catch (error) {
         console.error('Erro ao registrar item:', error);
         showToast('Erro de conexão com o servidor', 'error');
@@ -477,25 +500,89 @@ window.selectBranch = (branchName) => {
 function renderBranchList() {
     if (!branchListContainer) return;
     const searchTerm = branchSearch.value.toLowerCase();
+
+    // Filtra as filiais com base no estado e termo de busca
     const filtered = branches.filter(b => {
         const matchesState = !selectedState || b.state === selectedState;
-        const matchesSearch = b.name.toLowerCase().includes(searchTerm) || b.location.toLowerCase().includes(searchTerm);
-        return matchesState && matchesSearch;
+        const nameMatches = b.name.toLowerCase().includes(searchTerm);
+        const locMatches = (b.location || '').toLowerCase().includes(searchTerm);
+        return matchesState && (nameMatches || locMatches);
     });
 
     branchListContainer.innerHTML = '';
-    filtered.forEach(branch => {
+
+    // Pegamos as cidades e filiais que não são sub-unidades (não têm pai definido)
+    const mainItems = filtered.filter(b => !b.city);
+
+    mainItems.forEach((item, index) => {
         const div = document.createElement('div');
         div.className = 'branch-item';
-        div.onclick = () => selectBranch(branch.name);
-        div.innerHTML = `
-            <span class="branch-name">${branch.name}</span>
-            <span class="branch-location"><i data-lucide="map-pin" width="12" height="12"></i> ${branch.location}</span>
-        `;
-        branchListContainer.appendChild(div);
+
+        if (item.isCity) {
+            // É uma Cidade (ex: Votuporanga) - Estética idêntica às outras, mas expansível
+            div.onclick = (e) => toggleBranchUnits(e, item.name, index);
+            div.innerHTML = `
+                <div style="flex: 1; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; flex-direction: column;">
+                        <span class="branch-name">${item.name}</span>
+                        <span class="branch-location" style="font-size: 11px;">Toque para ver unidades locais</span>
+                    </div>
+                    <i data-lucide="chevron-down" width="18" height="18" style="color: #777; margin-left: 10px;"></i>
+                </div>
+            `;
+            branchListContainer.appendChild(div);
+
+            // Container para as sub-unidades desta cidade
+            const subContainer = document.createElement('div');
+            subContainer.id = `subUnits-${index}`;
+            subContainer.className = 'branch-sublist';
+
+            // Filtra unidades que pertencem a esta cidade
+            const cityUnits = filtered.filter(u => u.city === item.name);
+            cityUnits.forEach(unit => {
+                const unitDiv = document.createElement('div');
+                unitDiv.className = 'branch-item sub-branch-item';
+                unitDiv.onclick = (e) => {
+                    e.stopPropagation();
+                    selectBranch(unit.name);
+                };
+                unitDiv.innerHTML = `
+                    <div style="flex: 1;">
+                        <span class="branch-name" style="font-size: 14px;">${unit.name}</span>
+                        <span class="branch-location" style="font-size: 11px; opacity: 0.8;">${unit.location}</span>
+                    </div>
+                `;
+                subContainer.appendChild(unitDiv);
+            });
+            branchListContainer.appendChild(subContainer);
+        } else {
+            // É uma filial comum
+            div.onclick = () => selectBranch(item.name);
+            div.innerHTML = `
+                <span class="branch-name">${item.name}</span>
+                <span class="branch-location"><i data-lucide="map-pin" width="12" height="12"></i> ${item.location}</span>
+            `;
+            branchListContainer.appendChild(div);
+        }
     });
+
     lucide.createIcons();
 }
+
+window.toggleBranchUnits = (e, cityName, index) => {
+    e.stopPropagation();
+    const container = document.getElementById(`subUnits-${index}`);
+    const header = e.currentTarget;
+    const icon = header.querySelector('i');
+
+    if (container) {
+        const isExpanded = container.classList.toggle('expanded');
+        if (icon) {
+            icon.setAttribute('data-lucide', isExpanded ? 'chevron-up' : 'chevron-down');
+            lucide.createIcons();
+        }
+    }
+};
 
 // Eventos de Navegação dos Modais
 if (btnSendEmail) {
@@ -589,7 +676,8 @@ async function openSendConfirmation() {
         if (confirmBranchName) confirmBranchName.innerHTML = `${destName}`;
 
         if (confirmItemsList) {
-            confirmItemsList.innerHTML = items.map(item => {
+            // Exibe o último capturado primeiro no resumo de conferência
+            confirmItemsList.innerHTML = [...items].reverse().map(item => {
                 const isImg = isImageUrl(item.code) || item.code.startsWith('http');
                 const contentDisplay = isImg
                     ? `<button class="btn-expand-img" onclick="openPreview('${item.code}')">
@@ -715,10 +803,12 @@ if (btnFinalConfirmSend) {
                         btnConfirmSend.style.opacity = '0.5';
                     }
                 } else {
-                    showToast('nao foi possivel encaminhar para o gmail selecionado.', 'error');
+                    const result = await response.json().catch(() => ({ error: 'nao foi possivel encaminhar para o gmail selecionado.' }));
+                    showToast(result.error || 'nao foi possivel encaminhar para o gmail selecionado.', 'error');
                 }
             } catch (error) {
-                showToast('nao foi possivel encaminhar para o gmail selecionado.', 'error');
+                console.error('Erro ao enviar relatório:', error);
+                showToast('Erro de conexão ou erro interno no servidor.', 'error');
             }
         }, 2500);
     });
