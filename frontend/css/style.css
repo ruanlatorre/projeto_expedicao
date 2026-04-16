@@ -279,8 +279,8 @@ body {
     100% {
         opacity: 0;
         visibility: hidden;
+        display: none;
         z-index: -999;
-        /* Parafal que fez sumir o splash screen */
     }
 }
 

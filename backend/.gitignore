@@ -1,4 +1,0 @@
-.env
-vendor/
-database/database.sqlite
-*.log

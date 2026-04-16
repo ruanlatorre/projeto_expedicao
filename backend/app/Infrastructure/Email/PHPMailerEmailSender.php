@@ -9,18 +9,21 @@ class PHPMailerEmailSender implements EmailSender
 {
     private string $host;
     private int $port;
+    private bool $auth;
     private string $username;
     private string $password;
+    private string $secure;
     private string $fromEmail;
     private string $fromName;
 
     public function __construct()
     {
-        // Settings should ideally come from environment variables
         $this->host = getenv('SMTP_HOST') ?: 'smtp.gmail.com';
         $this->port = (int)(getenv('SMTP_PORT') ?: 587);
+        $this->auth = filter_var(getenv('SMTP_AUTH') ?: 'true', FILTER_VALIDATE_BOOLEAN);
         $this->username = getenv('SMTP_USER') ?: '';
         $this->password = getenv('SMTP_PASS') ?: '';
+        $this->secure = getenv('SMTP_SECURE') ?: 'tls'; // tls, ssl, ou none
         $this->fromEmail = getenv('MAIL_FROM') ?: '';
         $this->fromName = getenv('MAIL_NAME') ?: 'Facchini Data Collection';
     }
@@ -32,11 +35,25 @@ class PHPMailerEmailSender implements EmailSender
         try {
             $mail->isSMTP();
             $mail->Host = $this->host;
-            $mail->SMTPAuth = true;
-            $mail->Username = $this->username;
-            $mail->Password = $this->password;
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = $this->port;
+            $mail->CharSet = 'UTF-8';
+
+            // Autenticação (desabilitada para relay)
+            $mail->SMTPAuth = $this->auth;
+            if ($this->auth) {
+                $mail->Username = $this->username;
+                $mail->Password = $this->password;
+            }
+
+            // Criptografia (desabilitada para relay)
+            if ($this->secure === 'tls') {
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            } elseif ($this->secure === 'ssl') {
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            } else {
+                $mail->SMTPSecure = '';
+                $mail->SMTPAutoTLS = false;
+            }
 
             $mail->setFrom($this->fromEmail, $this->fromName);
             $mail->addAddress($to);
@@ -52,3 +69,4 @@ class PHPMailerEmailSender implements EmailSender
         }
     }
 }
+

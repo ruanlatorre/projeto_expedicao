@@ -356,10 +356,14 @@ if (form) {
 // --- Lógica da Sidebar ---
 function openSidebar() {
     if (sidebar && sidebarOverlay) {
-        sidebar.style.right = '0';
-        sidebarOverlay.style.visibility = 'visible';
-        sidebarOverlay.style.opacity = '1';
-        // Removido lucide.createIcons() daqui para evitar substituição de elementos estáveis
+        sidebar.style.display = 'flex';
+        // Pequeno atraso para permitir que o display:flex seja aplicado antes da transição de posição
+        setTimeout(() => {
+            sidebar.style.right = '0';
+            sidebar.style.visibility = 'visible';
+            sidebarOverlay.style.visibility = 'visible';
+            sidebarOverlay.style.opacity = '1';
+        }, 10);
     }
 }
 
@@ -369,6 +373,8 @@ function closeSidebar() {
         sidebarOverlay.style.opacity = '0';
         setTimeout(() => {
             if (sidebarOverlay.style.opacity === '0') {
+                sidebar.style.visibility = 'hidden';
+                sidebar.style.display = 'none';
                 sidebarOverlay.style.visibility = 'hidden';
             }
         }, 300);
@@ -975,9 +981,11 @@ if (btnEnterApp && splashScreen && appContainer) {
             stopAutoRotate();
             splashScreen.classList.add('fade-out');
             appContainer.classList.add('reveal');
-            /* setTimeout(() => {
-                            if (input) input.focus();
-                        }, 500); */
+            
+            // Remove o Splash Screen do fluxo do sistema após a animação
+            setTimeout(() => {
+                splashScreen.style.display = 'none';
+            }, 500);
         });
     }
 }

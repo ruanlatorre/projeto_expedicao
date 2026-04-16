@@ -18,7 +18,7 @@ const getApiBaseUrl = () => {
     // Remove barra duplicada se o path for apenas "/"
     const basePath = path === '/' ? '' : path.replace(/\/$/, '');
 
-    return url.origin + basePath + '/backend/public/index.php';
+    return url.origin + basePath + '/api';
 };
 
 const API_BASE_URL = getApiBaseUrl();
