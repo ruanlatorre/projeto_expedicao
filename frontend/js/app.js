@@ -1,23 +1,5 @@
-const getApiBaseUrl = () => {
-    const url = new URL(window.location.href);
-    let path = url.pathname;
-
-    // Remove o nome do arquivo se presente (ex: index.html)
-    if (path.includes('.html')) {
-        path = path.substring(0, path.lastIndexOf('/'));
-    }
-
-    // Se estiver dentro da pasta frontend, sobe um nível para achar a raiz do projeto
-    if (path.endsWith('/frontend')) {
-        path = path.substring(0, path.lastIndexOf('/frontend'));
-    }
-
-    // Remove barra duplicada se o path for apenas "/"
-    const basePath = path === '/' ? '' : path.replace(/\/$/, '');
-
-    return url.origin + basePath + '/backend/public/index.php';
-};
-const API_BASE_URL = getApiBaseUrl();
+// API_BASE_URL é carregado globalmente via api-config.js (incluído antes deste script no HTML)
+// Não redeclare getApiBaseUrl aqui para evitar inconsistências.
 
 // Inicializa ícones
 lucide.createIcons();
@@ -981,7 +963,7 @@ if (btnEnterApp && splashScreen && appContainer) {
             stopAutoRotate();
             splashScreen.classList.add('fade-out');
             appContainer.classList.add('reveal');
-            
+
             // Remove o Splash Screen do fluxo do sistema após a animação
             setTimeout(() => {
                 splashScreen.style.display = 'none';

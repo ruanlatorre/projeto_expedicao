@@ -6,12 +6,14 @@ const btnSwitchCamera = document.getElementById('btnSwitchCamera');
 // --- Estado Global do Scanner ---
 let html5QrCode = null;
 let currentFacingMode = "environment";
+let currentScanMode = 'QR';
+let isInitializing = false; // Trava para evitar múltiplas instâncias simultâneas
 
-// --- Modal da Câmera: Toggle QR / Código de Barras ---
+// --- Utilidades ---
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const btnModeQR = document.getElementById('btnModeQR');
 const btnModeBarcode = document.getElementById('btnModeBarcode');
 const modeSlider = document.getElementById('modeSlider');
-let currentScanMode = 'QR';
 
 function setScanMode(mode) {
     currentScanMode = mode;
@@ -29,7 +31,7 @@ function setScanMode(mode) {
         if (scanArea) scanArea.classList.add('barcode-mode');
     }
 
-    // Se a câmera já estiver rodando, reiniciamos ela com as novas configurações
+    // Se a câmera já estiver rodando, reiniciamos ela com os novos formatos
     if (html5QrCode && html5QrCode.isScanning) {
         startCamera();
     }
@@ -40,117 +42,128 @@ if (btnModeBarcode) btnModeBarcode.addEventListener('click', () => setScanMode('
 
 // --- Lógica da Câmera (html5-qrcode) ---
 async function startCamera() {
-    // Limpa instância anterior se existir
+    // 1. Limpeza total de instâncias anteriores
     if (html5QrCode) {
         try {
-            if (html5QrCode.isScanning) {
-                await html5QrCode.stop();
-            }
+            if (html5QrCode.isScanning) await html5QrCode.stop();
+            await html5QrCode.clear();
         } catch (e) {
-            console.warn("Erro ao parar câmera anterior:", e);
-        }
-        try {
-            html5QrCode.clear();
-        } catch (e) {
-            // clear() pode falhar se o DOM foi alterado, ignorar
+            console.warn("Limpando instância anterior:", e);
         }
         html5QrCode = null;
     }
 
-    // Garante que o container reader está limpo
     const readerEl = document.getElementById('reader');
     if (readerEl) readerEl.innerHTML = '';
 
-    html5QrCode = new Html5Qrcode("reader");
+    // 2. Definir formatos baseado no modo (QR ou Barcode)
+    const formats = currentScanMode === 'QR'
+        ? [Html5QrcodeSupportedFormats.QR_CODE]
+        : [
+            Html5QrcodeSupportedFormats.CODE_128,
+            Html5QrcodeSupportedFormats.CODE_39,
+            Html5QrcodeSupportedFormats.EAN_13,
+            Html5QrcodeSupportedFormats.EAN_8,
+            Html5QrcodeSupportedFormats.UPC_A
+        ];
 
-    // Configuração baseada no modo selecionado
-    const isQRCode = currentScanMode === 'QR';
+    // 3. Criar nova instância (formatsToSupport deve ir no construtor)
+    html5QrCode = new Html5Qrcode("reader", {
+        formatsToSupport: formats,
+        verbose: false
+    });
+
     const config = {
-        fps: 25,
+        fps: 10,
         qrbox: (viewfinderWidth, viewfinderHeight) => {
-            // Sincroniza com o CSS: min(75vw, 75vh, 280px) ou (85vw, 85vh, 500px)
             const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-
-            if (isQRCode) {
-                // QR: Quadrado perfeito (75% da menor borda, limitado a 280px)
+            if (currentScanMode === 'QR') {
                 const size = Math.floor(Math.min(minEdge * 0.75, 280));
                 return { width: size, height: size };
             } else {
-                // Barcode: Retângulo horizontal (85% da menor borda ou até 450px)
                 const width = Math.floor(Math.min(viewfinderWidth * 0.85, 450));
-                const height = Math.floor(width / 2.5); // Segue o aspect-ratio 2.5 / 1 do CSS
+                const height = Math.floor(width / 2.5);
                 return { width: width, height: height };
             }
         },
-        aspectRatio: undefined,
-        disableFlip: false,
-        formatsToSupport: isQRCode
-            ? [Html5QrcodeSupportedFormats.QR_CODE]
-            : [
-                Html5QrcodeSupportedFormats.CODE_128,
-                Html5QrcodeSupportedFormats.CODE_39,
-                Html5QrcodeSupportedFormats.EAN_13,
-                Html5QrcodeSupportedFormats.EAN_8,
-                Html5QrcodeSupportedFormats.UPC_A
-            ]
+        aspectRatio: 1.0
     };
 
     const onSuccess = (decodedText) => {
-        console.log("Código lido:", decodedText);
+        console.log("%c[SCANNER] Código detectado: " + decodedText, "color: green; font-weight: bold;");
         if (navigator.vibrate) navigator.vibrate(200);
-
-        // Chama a função global addCode do app.js
-        if (typeof addCode === 'function') {
-            addCode(decodedText);
-        }
+        if (typeof addCode === 'function') addCode(decodedText);
         closeCamera();
     };
 
-    const onError = () => { /* Silenciar erros de busca */ };
+    const onError = (err) => {
+        // Log para ver se o scanner está tentando ler, mas falhando na decodificação
+        // Se este log aparecer repetidamente, significa que o motor está funcionando!
+        console.debug("[SCANNER] Buscando código...");
+    };
 
-    // Tentativa 1: Usar facingMode
-    try {
-        await html5QrCode.start(
-            { facingMode: currentFacingMode },
-            config,
-            onSuccess,
-            onError
-        );
-        return;
-    } catch (err) {
-        console.warn("facingMode falhou, tentando listar câmeras...", err);
-    }
+    // 4. Iniciar Câmera com Fallback Robusto
+    if (isInitializing) return;
+    isInitializing = true;
 
-    // Tentativa 2: Listar câmeras disponíveis
     try {
-        const cameras = await Html5Qrcode.getCameras();
-        if (cameras && cameras.length > 0) {
-            let cameraId = cameras[0].id;
-            for (const cam of cameras) {
-                if (cam.label && (cam.label.toLowerCase().includes('back') || cam.label.toLowerCase().includes('traseira') || cam.label.toLowerCase().includes('rear'))) {
-                    cameraId = cam.id;
+        // Verificação de Contexto Seguro (Exigência do Navegador para getUserMedia)
+        if (!window.isSecureContext && window.location.hostname !== 'localhost') {
+            console.error("Contexto Inseguro detectado.");
+            if (typeof showToast === 'function') {
+                showToast("A câmera exige HTTPS ou localhost para funcionar.", "error");
+            }
+            isInitializing = false;
+            return;
+        }
+
+        // Aguarda um curto período para garantir que o hardware foi liberado
+        await sleep(300);
+
+        // Tenta listar câmeras primeiro
+        const devices = await Html5Qrcode.getCameras();
+
+        if (devices && devices.length > 0) {
+            // Busca a câmera ideal (traseira se estiver no celular)
+            let deviceId = devices[0].id;
+            for (const device of devices) {
+                const label = device.label.toLowerCase();
+                if (label.includes('back') || label.includes('traseira') || label.includes('rear')) {
+                    deviceId = device.id;
                     break;
                 }
             }
-            await html5QrCode.start(
-                cameraId,
-                config,
-                onSuccess,
-                onError
-            );
+            await html5QrCode.start(deviceId, config, onSuccess, onError);
         } else {
-            if (typeof showToast === 'function') showToast("Nenhuma câmera encontrada", "error");
+            // Fallback para facingMode se getCameras falhar ou retornar vazio
+            await html5QrCode.start({ facingMode: currentFacingMode }, config, onSuccess, onError);
         }
-    } catch (err2) {
-        console.error("Erro ao acessar câmera:", err2);
-        if (typeof showToast === 'function') showToast("Erro ao acessar câmera. Verifique as permissões.", "error");
+    } catch (err) {
+        console.error("Falha fatal ao iniciar câmera:", err);
+
+        let errorMsg = "Não foi possível acessar a câmera.";
+
+        if (err.name === 'NotReadableError' || err.message.includes('Device in use')) {
+            errorMsg = "Câmera em uso por outro aplicativo ou aba. Feche-os e tente novamente.";
+        } else if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+            errorMsg = "Permissão da câmera negada pelo navegador.";
+        } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+            errorMsg = "Nenhuma câmera encontrada no dispositivo.";
+        }
+
+        if (typeof showToast === 'function') {
+            showToast(errorMsg, "error");
+        }
+    } finally {
+        isInitializing = false;
     }
 }
 
 async function stopCamera() {
-    if (html5QrCode && html5QrCode.isScanning) {
+    if (html5QrCode) {
         try {
-            await html5QrCode.stop();
+            if (html5QrCode.isScanning) await html5QrCode.stop();
+            html5QrCode.clear();
         } catch (err) {
             console.error("Erro ao parar câmera:", err);
         }
@@ -162,60 +175,29 @@ function closeCamera() {
     stopCamera();
 }
 
-// Evento: Abrir Modal da Câmera
-if (btnSimulateScan) {
-    btnSimulateScan.addEventListener('click', () => {
+// Eventos
+if (document.getElementById('btnSimulateScan')) {
+    document.getElementById('btnSimulateScan').addEventListener('click', () => {
         if (cameraModal) cameraModal.style.display = 'flex';
         startCamera();
         if (typeof lucide !== 'undefined') lucide.createIcons();
     });
 }
 
-// Evento: Fechar Modal da Câmera
 if (btnCloseCamera) btnCloseCamera.addEventListener('click', closeCamera);
 
-// Evento: Alternar Câmera
 if (btnSwitchCamera) {
     btnSwitchCamera.addEventListener('click', async () => {
         currentFacingMode = currentFacingMode === "environment" ? "user" : "environment";
-        await stopCamera();
-        startCamera();
+        await startCamera();
     });
 }
 
-// listener para redimensionamento e orientação - Garante que a "parte branca" volte
+// Reinício em redimensionamento
 let resizeTimer;
-const restartScanner = async () => {
+window.addEventListener('resize', () => {
     if (cameraModal && cameraModal.style.display === 'flex') {
         clearTimeout(resizeTimer);
-        // Delay de 400ms para garantir que o navegador termine a transição de rotação
-        resizeTimer = setTimeout(async () => {
-            console.log("Limpando DOM e forçando reinício total do scanner...");
-            if (html5QrCode) {
-                try {
-                    if (html5QrCode.isScanning) {
-                        await html5QrCode.stop();
-                    }
-                } catch (e) {
-                    console.warn("Erro ao parar scanner:", e);
-                }
-                html5QrCode = null;
-            }
-            // Limpa o container e qualquer estilo inline que a biblioteca tenha injetado
-            const reader = document.getElementById('reader');
-            if (reader) {
-                reader.innerHTML = '';
-                reader.removeAttribute('style');
-                // Reaplica estilos base necessários
-                reader.style.width = '100%';
-                reader.style.position = 'relative';
-                reader.style.flex = '1';
-                reader.style.background = '#000';
-            }
-            await startCamera();
-        }, 400);
+        resizeTimer = setTimeout(startCamera, 500);
     }
-};
-
-window.addEventListener('resize', restartScanner);
-window.addEventListener('orientationchange', restartScanner);
+});

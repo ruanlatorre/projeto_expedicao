@@ -1,0 +1,19 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Redireciona chamadas para /api/... para o index.php?route=/...
+    # Isso torna o Apache compatível com o comportamento do Nginx configurado
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php?route=/$1 [L,QSA]
+</IfModule>
+
+# Impedir listagem de diretórios
+Options -Indexes
+
+# Configurações de cabeçalhos de segurança básicos
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, DELETE, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type"
+</IfModule>

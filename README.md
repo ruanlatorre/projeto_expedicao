@@ -73,6 +73,27 @@ Para configurar o ambiente de desenvolvimento local, siga os passos abaixo:
 
 ---
 
+## 🐧 Deploy em Servidores Linux (Nginx)
+
+Para colocar em produção em um servidor Linux com Nginx, siga estas recomendações:
+
+### 1. Configuração do Nginx
+Consulte o arquivo [backend/nginx.conf.example](backend/nginx.conf.example) para ver um modelo de configuração do Virtual Host. O ponto principal é garantir que as requisições para `/api` sejam encaminhadas para o `backend/public/index.php`.
+
+### 2. Permissões de Pasta
+O servidor Linux é rigoroso com permissões. Você deve garantir que o usuário do servidor web (geralmente `www-data`) tenha permissão de escrita na pasta do banco de dados:
+
+```bash
+# Navegue até a pasta do projeto
+sudo chown -R www-data:www-data backend/database
+sudo chmod -R 775 backend/database
+```
+
+### 3. Case-Sensitivity
+Certifique-se de que todos os arquivos e pastas mantêm o padrão de maiúsculas/minúsculas definido no repositório, pois o Linux diferencia `pasta/Arquivo.php` de `pasta/arquivo.php`.
+
+---
+
 ## 📄 Licença
 
 Este projeto é de uso exclusivo e propriedade da **Facchini S/A**. Todos os direitos reservados.
