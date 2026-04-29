@@ -12,8 +12,7 @@
     <link rel="preload" href="frontend/js/app.js?v=2" as="script">
     <link rel="preload" href="frontend/js/scanner.js?v=2" as="script">
     <script src="frontend/assets/vendor/js/lucide.min.js"></script>
-    <script src="frontend/assets/vendor/js/html5-qrcode.min.js"></script>
-    <script src="frontend/assets/vendor/js/jsQR.min.js"></script>
+    <script src="frontend/assets/vendor/js/opencv.js" async onload="window.onOpenCvReady && window.onOpenCvReady();"></script>
 </head>
 
 <body>
@@ -383,9 +382,10 @@
             </div>
         </div>
 
+        <script src="frontend/js/api-config.js?v=3"></script>
         <script src="frontend/js/config.js"></script>
-        <script src="frontend/js/app.js?v=2"></script>
-        <script src="frontend/js/scanner.js"></script>
+        <script src="frontend/js/app.js?v=3"></script>
+        <script src="frontend/js/scanner.js?v=7"></script>
 
 </body>
 

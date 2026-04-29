@@ -1,0 +1,105 @@
+# =====================================================
+# Configuração Nginx para FacchiniLOG (Produção Linux)
+# =====================================================
+#
+# IMPORTANTE: Após criar/editar o arquivo, execute:
+#   sudo nginx -t            (testa a configuração)
+#   sudo systemctl reload nginx  (recarrega as configurações)
+
+server {
+    listen 80;
+    server_name seu-dominio.com; # Ou o IP do servidor
+
+    # Raiz do projeto (onde está o index.html do frontend)
+    root /var/www/projeto_expedicao_2;
+    index index.html;
+
+    charset utf-8;
+
+    # -----------------------------------------------
+    # 1. Frontend (Arquivos estáticos)
+    # -----------------------------------------------
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # -----------------------------------------------
+    # 2. API Backend (Prefixo /api)
+    # -----------------------------------------------
+    # Esta regra captura chamadas para /api/qualquer-coisa
+    # e envia para o index.php do backend.
+    
+    location /api/ {
+        # Se for subpasta, remova a barra inicial da rewrite
+        rewrite ^/api/(.*)$ /backend/public/index.php?route=/$1 last;
+    }
+
+    # Tratamento para /api sem barra (opcional)
+    location = /api {
+        rewrite ^ /backend/public/index.php?route=/ last;
+    }
+
+    # -----------------------------------------------
+    # 3. Processamento PHP (PHP-FPM)
+    # -----------------------------------------------
+    location ~ \.php$ {
+        try_files $uri =404;
+        include snippets/fastcgi-php.conf;
+        
+        # ATENÇÃO: Ajuste a versão do PHP aqui! 
+        # Comande 'php -v' para saber. Exemplos comuns:
+        #   php8.2-fpm.sock
+        #   php8.1-fpm.sock
+        #   php8.3-fpm.sock
+        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
+        
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+        fastcgi_read_timeout 60s;
+    }
+
+    # -----------------------------------------------
+    # 4. Segurança: Bloquear acesso a arquivos sensíveis
+    # -----------------------------------------------
+    
+    # Bloquear arquivos ocultos (.env, .git)
+    location ~ /\.(ht|git|env) {
+        deny all;
+    }
+
+    # Bloquear acesso direto aos diretórios de lógica do backend
+    location ^~ /backend/app { deny all; }
+    location ^~ /backend/database { deny all; }
+    location ^~ /backend/composer { deny all; }
+    location ^~ /backend/vendor { deny all; }
+
+    # Logs de erro e acesso
+    access_log /var/log/nginx/facchinilog_access.log;
+    error_log /var/log/nginx/facchinilog_error.log;
+}
+
+
+# =====================================================
+# INSTRUÇÕES DE INSTALAÇÃO (LINUX)
+# =====================================================
+
+# 1. PERMISSÕES DE ESCRITA (CRUCIAL):
+# O servidor Linux precisa de permissão para gravar no banco JSON.
+# Execute (assumindo que o projeto está em /var/www/projeto_expedicao_2):
+#
+#   sudo chown -R www-data:www-data /var/www/projeto_expedicao_2
+#   sudo chmod -R 775 /var/www/projeto_expedicao_2/backend/database
+#
+# 2. INSTALAÇÃO DO PHP E EXTENSÕES (Debian/Ubuntu):
+#   sudo apt update
+#   sudo apt install php8.2-fpm php8.2-mbstring php8.2-json php8.2-openssl php8.2-curl composer
+#
+# 3. ATIVAÇÃO DO SITE:
+#   sudo cp backend/nginx.conf.example /etc/nginx/sites-available/facchinilog
+#   sudo ln -s /etc/nginx/sites-available/facchinilog /etc/nginx/sites-enabled/
+#   sudo nginx -t
+#   sudo systemctl reload nginx
+#
+# 4. DEPENDÊNCIAS DO BACKEND:
+#   cd /var/www/projeto_expedicao_2/backend
+#   composer install --no-dev --optimize-autoloader

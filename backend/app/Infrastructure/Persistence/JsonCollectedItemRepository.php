@@ -12,24 +12,69 @@ class JsonCollectedItemRepository implements CollectedItemRepository
 
     public function __construct()
     {
-        $this->filePath = __DIR__ . '/../../../database/items.json';
-        if (!file_exists(dirname($this->filePath))) {
-            mkdir(dirname($this->filePath), 0777, true);
+        // Usar caminhos absolutos baseados no diretório do script para evitar problemas de CWD no Linux
+        $baseDir = dirname(__DIR__, 3);
+        
+        // Sempre usar barra normal (/) — funciona tanto no Windows quanto no Linux
+        $this->filePath = str_replace('\\', '/', $baseDir) . '/database/items.json';
+        
+        $dbDir = dirname($this->filePath);
+        
+        if (!is_dir($dbDir)) {
+            if (!@mkdir($dbDir, 0775, true)) {
+                throw new \RuntimeException(
+                    "Não foi possível criar a pasta database/. " .
+                    "Verifique as permissões do diretório pai para o usuário PHP-FPM (geralmente www-data). " .
+                    "Execute: sudo chown -R www-data:www-data " . dirname($dbDir)
+                );
+            }
         }
+        
+        if (!is_writable($dbDir)) {
+            throw new \RuntimeException(
+                "A pasta database/ não tem permissão de escrita para o usuário PHP. " .
+                "No Nginx/Linux, execute: sudo chown -R www-data:www-data " . $dbDir . " && chmod -R 775 " . $dbDir
+            );
+        }
+        
         if (!file_exists($this->filePath)) {
-            file_put_contents($this->filePath, json_encode([]));
+            if (@file_put_contents($this->filePath, json_encode([], JSON_PRETTY_PRINT)) === false) {
+                throw new \RuntimeException(
+                    "Não foi possível criar items.json em: " . $this->filePath
+                );
+            }
         }
     }
 
     private function readItems(): array
     {
-        $content = file_get_contents($this->filePath);
-        return json_decode($content, true) ?: [];
+        $content = @file_get_contents($this->filePath);
+        if ($content === false) {
+            return [];
+        }
+        $data = json_decode($content, true);
+        return is_array($data) ? $data : [];
     }
 
     private function writeItems(array $items): void
     {
-        file_put_contents($this->filePath, json_encode(array_values($items), JSON_PRETTY_PRINT));
+        $data = json_encode(array_values($items), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        
+        // Usar file locking para evitar condições de corrida em acessos simultâneos
+        $fp = fopen($this->filePath, 'c');
+        if ($fp === false) {
+            throw new \RuntimeException("Não foi possível abrir items.json para escrita.");
+        }
+        
+        if (flock($fp, LOCK_EX)) {
+            ftruncate($fp, 0);
+            rewind($fp);
+            fwrite($fp, $data);
+            fflush($fp);
+            flock($fp, LOCK_UN);
+        }
+        
+        fclose($fp);
     }
 
     public function save(CollectedItem $item): void
