@@ -1,3 +1,4 @@
+/* global cv, lucide, showToast, addCode */
 // --- Elementos do Modal da Câmera ---
 const cameraModal = document.getElementById('cameraModal');
 const btnCloseCamera = document.getElementById('btnCloseCamera');
@@ -14,7 +15,6 @@ let video = null;
 let canvas = null;
 let ctx = null;
 let src = null;
-let cap = null;
 let qrDecoder = null;
 
 let cvReady = false;
@@ -110,8 +110,18 @@ async function startCamera() {
 
     } catch (err) {
         console.error("Falha ao iniciar câmera:", err);
+
+        let errorMsg = "Não foi possível acessar a câmera.";
+        if (err.name === 'NotReadableError') {
+            errorMsg = "Câmera em uso por outro app. Feche-o e tente novamente.";
+        } else if (err.name === 'NotAllowedError') {
+            errorMsg = "Permissão da câmera negada pelo navegador.";
+        } else if (err.name === 'NotFoundError') {
+            errorMsg = "Nenhuma câmera encontrada no dispositivo.";
+        }
+
         if (typeof showToast === 'function') {
-            showToast("Não foi possível acessar a câmera.", "error");
+            showToast(errorMsg, "error");
         }
     }
 }

@@ -14,34 +14,15 @@ const getApiBaseUrl = () => {
         path = path.substring(0, path.lastIndexOf('/'));
     }
 
-    // 2. Extrair a base do projeto removendo a pasta 'frontend' se estiver nela
-    const segments = path.split('/').filter(s => s !== '');
-    if (segments.length > 0 && segments[segments.length - 1] === 'frontend') {
-        segments.pop();
-    }
-    
-    // Reconstrói a base do projeto (ex: "" ou "/projeto")
-    const projectRoot = segments.length > 0 ? '/' + segments.join('/') : '';
-
-    // 3. Detecção de ambiente e construção da URL
-    // IPs de rede local devem ser tratados como desenvolvimento (XAMPP)
-    const isLocalOrNetwork = (
-        url.hostname === 'localhost' || 
-        url.hostname === '127.0.0.1' || 
-        url.hostname.startsWith('192.168.') || 
-        url.hostname.startsWith('10.') || 
-        url.hostname.startsWith('172.') ||
-        url.hostname.includes('.local')
-    );
-
-    if (isLocalOrNetwork) {
-        // No XAMPP, o .htaccess no backend/public permite usar /api ou o path direto.
-        // Usar /backend/public/index.php é o mais seguro para evitar problemas de mod_rewrite desativado.
-        return url.origin + projectRoot + '/backend/public/index.php';
+    // Se estiver dentro da pasta frontend, sobe um nível para achar a raiz do projeto
+    if (path.endsWith('/frontend')) {
+        path = path.substring(0, path.lastIndexOf('/frontend'));
     }
 
-    // Produção (Nginx): Caminho relativo para o prefixo /api que o Nginx gerencia
-    return url.origin + projectRoot + '/api';
+    // Remove barra duplicada se o path for apenas "/"
+    const basePath = path === '/' ? '' : path.replace(/\/$/, '');
+
+    return url.origin + basePath + '/api';
 };
 
 
