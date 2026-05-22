@@ -277,11 +277,33 @@ if (btnCancelDelete) {
     });
 }
 
+// Função para sanitizar e formatar a entrada
+function sanitizeInput(inputStr) {
+    if (!inputStr) return '';
+    // Permite caracteres alfanuméricos, hifens, underlines e pontos comuns em códigos.
+    // Se for uma URL (QR Code), permite os caracteres válidos de URL.
+    if (inputStr.startsWith('http')) {
+        // Escapa os caracteres HTML básicos para URLs para prevenir XSS
+        return inputStr.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
+    } else {
+        // Para códigos de barras padrão, remove qualquer caractere HTML/Script
+        // Mantém apenas letras, números, hifens e underlines
+        return inputStr.replace(/[^a-zA-Z0-9\-_]/g, '');
+    }
+}
+
 // Adicionar novo código à API
 async function addCode(code) {
-    if (!code.trim()) return;
+    if (!code || !code.trim()) return;
 
-    const trimmedCode = code.trim();
+    // Aplica sanitização anti-XSS no input
+    const trimmedCode = sanitizeInput(code.trim());
+    
+    if (!trimmedCode) {
+        showToast('Código inválido ou não suportado.', 'error');
+        if (input) input.value = '';
+        return;
+    }
 
     // TRAVA DE DUPLICIDADE (JavaScript)
     const exists = currentItems.some(i => i.code === trimmedCode);

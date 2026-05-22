@@ -16,6 +16,12 @@ class CollectItemService
 
     public function execute(string $code): CollectedItem
     {
+        $code = trim($code);
+        
+        // Sanitização contra XSS e injeção de código HTML no backend.
+        // O htmlspecialchars converte caracteres especiais (<, >, &, ", ') em entidades HTML.
+        $code = htmlspecialchars($code, ENT_QUOTES, 'UTF-8');
+        
         if (empty($code)) {
             throw new \InvalidArgumentException("Código inválido.");
         }
