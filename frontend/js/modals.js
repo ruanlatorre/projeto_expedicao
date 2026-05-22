@@ -11,7 +11,7 @@ const previewModal = document.getElementById('previewModal');
 let activeDestinationField = 'main';
 
 // Função para abrir o modal de pré-visualização
-window.openPreview = function(code) {
+window.openPreview = function (code) {
     if (!previewModal) return;
     previewModal.style.display = 'flex';
     previewModal.classList.add('show');
@@ -20,7 +20,7 @@ window.openPreview = function(code) {
     const previewFallback = document.getElementById('previewFallback');
     const fallbackCode = document.getElementById('fallbackCode');
 
-    if (isImageUrl(code)) {
+    if (isImageUrl(code) || (typeof code === 'string' && code.startsWith('http'))) {
         if (previewImage) {
             previewImage.src = code;
             previewImage.style.display = 'block';

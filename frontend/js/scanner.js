@@ -162,10 +162,13 @@ function processVideo() {
             console.log("%c[SCANNER] Código detectado: " + decodedText, "color: green; font-weight: bold;");
             if (navigator.vibrate) navigator.vibrate(200);
             if (typeof addCode === 'function') addCode(decodedText);
-            closeCamera();
             points.delete();
             straight_qrcode.delete();
-            src.delete();
+            if (src) {
+                src.delete();
+                src = null;
+            }
+            closeCamera();
             return;
         }
         

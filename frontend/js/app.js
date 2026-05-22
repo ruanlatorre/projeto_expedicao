@@ -158,12 +158,9 @@ window.openPreview = function (code) {
 
     let imageUrl = '';
 
-    if (isImageUrl(code)) {
-        // É uma imagem direta
+    if (isImageUrl(code) || code.startsWith('http')) {
+        // Tenta carregar o link diretamente como imagem (útil para links curtos que redirecionam para imagens)
         imageUrl = code;
-    } else if (code.startsWith('http')) {
-        // É um site, usar mshots para print da tela
-        imageUrl = `https://s.wordpress.com/mshots/v1/${encodeURIComponent(code)}?w=800`;
     }
 
     if (imageUrl) {

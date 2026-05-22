@@ -1,0 +1,8 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Redireciona chamadas para api/... para backend/public/index.php?route=/$1
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^api/(.*)$ backend/public/index.php?route=/$1 [L,QSA]
+</IfModule>
